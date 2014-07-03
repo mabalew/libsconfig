@@ -23,7 +23,8 @@ void Config::createDB() {
   stringstream sql;
   sql << "CREATE TABLE config (application VARCHAR NOT NULL " <<
     "DEFAULT 'DEFAULT_APPLICATION', context VARCHAR NOT NULL DEFAULT " <<
-    "'DEFAULT_CONTEXT', key VARCHAR, value VARCHAR NOT NULL DEFAULT ''," << 
+    "'DEFAULT_CONTEXT', key VARCHAR, value VARCHAR NOT NULL DEFAULT ''," <<
+    " temporary INTEGER NOT NULL DEFAULT 0, " <<
     "PRIMARY KEY(application, context, key));";
   rc = sqlite3_exec(db, sql.str().c_str(), 0, 0, &error);
   if (rc && rc != 1) {
@@ -37,6 +38,35 @@ void Config::createDB() {
 Config::Config(string dbFile) {
   this->dbFile_ = dbFile;
   createDB();
+}
+
+Config::~Config() {
+  removeTemporaryEntries();
+}
+
+void Config::removeTemporaryEntries() {
+  sqlite3 *db;
+  char *error = 0;
+  int rc;
+
+  rc = sqlite3_open(this->dbFile_.c_str(), &db);
+  if (rc) {
+    fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+  } else {
+    fprintf(stderr, "Database opened successfully\n");
+  }
+
+  string sql = "DELETE FROM config WHERE temporary = 1";
+
+  rc = sqlite3_exec(db, sql.c_str(), 0, 0, &error);
+  if (rc) {
+    fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+  } else {
+    fprintf(stderr, "Data deleted successfully\n");
+  }
+  sqlite3_close(db);
+
+
 }
 
 Config::configurationEntry Config::get(Config::configurationEntry *data) {
@@ -64,7 +94,7 @@ Config::configurationEntry Config::get(Config::configurationEntry *data) {
   } else {
     application = "'DEFAULT_APPLICATION' AND ";
   }
-  string sql = "SELECT application, context, value FROM config WHERE " +
+  string sql = "SELECT application, context, value, temporary FROM config WHERE " +
     application_col + application +
     context_col + context +
     "key = '" + data->key + "';";
@@ -76,6 +106,7 @@ Config::configurationEntry Config::get(Config::configurationEntry *data) {
     data->application = (char*)sqlite3_column_text(stmt, 0);
     data->context = (char*)sqlite3_column_text(stmt, 1);
     data->value = (char*)sqlite3_column_text(stmt, 2);
+    data->temporary = (bool)sqlite3_column_int(stmt, 3);
   }
 
   sqlite3_finalize(stmt);
@@ -192,15 +223,18 @@ int Config::put(configurationEntry data) {
     application = "'" + data.application + "',";
     application_col = "application, ";
   }
-  string sql = "INSERT INTO config(" +
-    (context_col.size() > 0 ? context_col : "") +
-    (application_col.size() > 0 ? application_col : "") +
-    " key, value) VALUES(" +
-    (context_col.size() > 0 ? context : "") +
-    (application_col.size() > 0 ? application: "") +
-    "'" + data.key + "', " +
-    "'" + data.value + "');";
-  rc = sqlite3_exec(db, sql.c_str(), 0, 0, &error);
+  stringstream sql;
+  sql << "INSERT INTO config(" <<
+    (context_col.size() > 0 ? context_col : "") <<
+    (application_col.size() > 0 ? application_col : "") <<
+    " key, value, temporary) VALUES(" <<
+    (context_col.size() > 0 ? context : "") <<
+    (application_col.size() > 0 ? application: "") <<
+    "'" << data.key << "', " <<
+    "'" << data.value << "', " <<
+    data.temporary << ");";
+  cout << sql.str() << endl;
+  rc = sqlite3_exec(db, sql.str().c_str(), 0, 0, &error);
   if (rc) {
     fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
     return 2;

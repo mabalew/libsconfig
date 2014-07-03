@@ -18,6 +18,7 @@ namespace config {
        * Create database if it does not exists.
        */
       void createDB();
+      void removeTemporaryEntries();
     public:
       /**
        * Constructor of the class
@@ -25,6 +26,7 @@ namespace config {
        * does not exists.
        */
       explicit Config(string dbFile);
+      ~Config();
 
       /**
        * Structure to hold configuration entry.
@@ -34,6 +36,7 @@ namespace config {
         string application;
         string key;
         string value;
+        bool temporary;
       };
 
       int put(configurationEntry entry);
