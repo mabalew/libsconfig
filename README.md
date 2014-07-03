@@ -2,6 +2,8 @@ libsconfig - lib(SQL)config
 ==========
 
 Library to manage configuration of your application. Stores data in SQLite database. Fast and simple to use.
+libsconfig supports temporary values as well. They are deleted after your program finish.
+
 Simple example:
 
 ```C++
@@ -18,6 +20,7 @@ int main(int argc, char **argv) {
   entry.context = "CONTEXT";
   entry.key = "KEY_1";
   entry.value = "VALUE_1";
+  entry.temporary = false;
 
   Config config = Config("config.db");
 
