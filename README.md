@@ -7,8 +7,8 @@ Simple example:
 ```C++
 #include <iostream>
 #include <stdio.h>
-#include "libsconfig.hpp"
 #include <string>
+#include "libsconfig.hpp"
 
 using namespace config;
 
