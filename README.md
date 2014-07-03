@@ -4,6 +4,7 @@ libsconfig - lib(SQL)config
 Library to manage configuration of your application. Stores data in SQLite database. Fast and simple to use.
 Simple example:
 
+```C++
 #include <iostream>
 #include <stdio.h>
 #include "libsconfig.hpp"
@@ -39,3 +40,4 @@ int main(int argc, char **argv) {
   // finally, remove the entry
   config.remove(entry);
 }
+```
