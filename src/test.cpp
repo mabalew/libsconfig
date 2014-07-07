@@ -62,6 +62,14 @@ void print(Config::configurationEntry *entry) {
   cout << "Is temporary: " << entry->temporary << endl << endl;
 }
 
+void printVector(vector<Config::configurationEntry> *entries) {
+  cout << "printing vector" << endl;
+  for (vector<Config::configurationEntry>::iterator it = entries->begin(); it != entries->end(); it++) {
+    Config::configurationEntry entry = *it;
+    print(&entry);
+  }
+}
+
 void test() {
   Config::configurationEntry data_1;
   Config::configurationEntry data_2;
@@ -105,6 +113,16 @@ void test() {
   config.update(data_2);
   cout << "after update: " << endl;
   print(&data_2);
+
+  cout << "list all" << endl;
+  vector<Config::configurationEntry> entriesAll = config.getAll("","");
+  printVector(&entriesAll);
+  cout << "list all for APP_1" << endl;
+  vector<Config::configurationEntry> entriesWithApp = config.getAll("APP_1","");
+  printVector(&entriesWithApp);
+  cout << "list all for CONTEXT_1" << endl;
+  vector<Config::configurationEntry> entriesWithContext = config.getAll("","CONTEXT_1");
+  printVector(&entriesWithContext);
 
   config.remove(data_1);
   config.remove(data_2);

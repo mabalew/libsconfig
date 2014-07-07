@@ -1,6 +1,8 @@
 #ifndef LIBCONFIG_H
 #define LIBCONFIG_H
 
+#include <vector>
+
 using namespace std;
 
 namespace config {
@@ -42,6 +44,7 @@ namespace config {
       int put(configurationEntry entry);
       int remove(configurationEntry entry);
       int update(configurationEntry entry);
+      vector<configurationEntry> getAll(string application, string context);
       configurationEntry get(configurationEntry *entry);
 
       string getDbFile();
